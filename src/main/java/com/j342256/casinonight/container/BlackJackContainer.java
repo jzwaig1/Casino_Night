@@ -105,13 +105,15 @@ public class BlackJackContainer extends Container implements IItemProvider {
         }
         return itemstack;
     }
-    public void generateItem(Item itg, int slotIndex){
-        //this.item = itg;
-        //int amt = this.tileEntity.getStackInSlot(0).getCount();
-        //this.tileEntity.setInventorySlotContents(slotIndex,new ItemStack(this.asItem(),amt));
-        this.item = itg;
-        ItemStack itm = new ItemStack(asItem(),5);
-        Networking.sendToServer(new BlackJackPacket(this.pos,itm,1));
+
+    public void takeBet() {
+        Networking.sendToServer(new BlackJackPacket(this.pos,  ItemStack.EMPTY, 0));
+    }
+    public void giveWinnings(){
+        int amt = this.inventorySlots.get(0).getStack().getCount();
+        this.item = this.inventorySlots.get(0).getStack().getItem();
+        ItemStack itm = new ItemStack(asItem(),amt);
+        Networking.sendToServer(new BlackJackPacket(this.pos,itm, 1));
     }
 
     @Override

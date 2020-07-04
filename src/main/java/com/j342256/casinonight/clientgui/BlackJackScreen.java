@@ -79,12 +79,14 @@ public class BlackJackScreen extends ContainerScreen<BlackJackContainer> impleme
         this.font.drawString(String.valueOf(game.getDealerScore()),x+115.0f,y+60.0f,4210752);
         if (busted){
             this.font.drawString("YOU BUSTED!",x+100.0f,y+80.0f,4210752);
+            this.container.takeBet();
             this.buttons.get(0).active = true;
             this.buttons.get(1).active = false;
             this.buttons.get(2).active = false;
         }
         if (result < 0){
             this.font.drawString("DEALER WINS!",x+100.0f,y+80.0f,4210752);
+            this.container.takeBet();
             this.buttons.get(0).active = true;
             this.buttons.get(1).active = false;
             this.buttons.get(2).active = false;
@@ -97,6 +99,7 @@ public class BlackJackScreen extends ContainerScreen<BlackJackContainer> impleme
         }
         if (result > 0 && result != 100){
             this.font.drawString("YOU WIN!",x+100.0f,y+80.0f,4210752);
+            this.container.giveWinnings();
             this.buttons.get(0).active = true;
             this.buttons.get(1).active = false;
             this.buttons.get(2).active = false;
@@ -122,7 +125,6 @@ public class BlackJackScreen extends ContainerScreen<BlackJackContainer> impleme
             button.active = false;
             this.buttons.get(1).active = true;
             this.buttons.get(2).active = true;
-            this.container.generateItem(Items.DIAMOND,1);
         }
         if (button == this.buttons.get(1)) {
             do {
