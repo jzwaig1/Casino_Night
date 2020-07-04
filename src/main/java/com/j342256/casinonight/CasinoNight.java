@@ -1,6 +1,7 @@
 package com.j342256.casinonight;
 
 import com.j342256.casinonight.util.ModContainerTypes;
+import com.j342256.casinonight.util.ModSetup;
 import com.j342256.casinonight.util.ModTileEntityTypes;
 import com.j342256.casinonight.util.RegistryHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -25,7 +26,7 @@ public class CasinoNight
         RegistryHandler.init();
 
         //MinecraftForge.EVENT_BUS.register(this);
-
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(ModSetup::init);
     }
 
     private void setup(final FMLCommonSetupEvent event)

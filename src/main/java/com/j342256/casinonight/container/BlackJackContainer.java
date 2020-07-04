@@ -1,7 +1,9 @@
 package com.j342256.casinonight.container;
 
 import com.j342256.casinonight.tileentity.BlackJackTileEntity;
+import com.j342256.casinonight.util.BlackJackPacket;
 import com.j342256.casinonight.util.ModContainerTypes;
+import com.j342256.casinonight.util.Networking;
 import com.j342256.casinonight.util.RegistryHandler;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
@@ -42,11 +44,13 @@ public class BlackJackContainer extends Container implements IItemProvider {
     private IWorldPosCallable canInteractWithCallable;
     private IItemHandler playerInv;
     private PlayerEntity playerEntity;
+    private BlockPos pos;
     public Item item;
 
     public BlackJackContainer(int windowId, World world, BlockPos pos, PlayerInventory playerInventory,
                               PlayerEntity player) {
         super(ModContainerTypes.BLACK_JACK.get(), windowId);
+        this.pos = pos;
         tileEntity = (BlackJackTileEntity) world.getTileEntity(pos);
         this.playerEntity = player;
         this.playerInv = new InvWrapper(playerInventory);
@@ -56,8 +60,6 @@ public class BlackJackContainer extends Container implements IItemProvider {
             tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
                 addSlot(new SlotItemHandler(h, 0, 70, 195));
                 addSlot(new SlotItemHandler(h, 1, 70, 175));
-                ItemStack p = new ItemStack(asItem(), 10);
-                putStackInSlot(1, p);
             });
         }
         int startX = 70;
@@ -107,7 +109,9 @@ public class BlackJackContainer extends Container implements IItemProvider {
         //this.item = itg;
         //int amt = this.tileEntity.getStackInSlot(0).getCount();
         //this.tileEntity.setInventorySlotContents(slotIndex,new ItemStack(this.asItem(),amt));
-        tileEntity.generateItem();
+        this.item = itg;
+        ItemStack itm = new ItemStack(asItem(),5);
+        Networking.sendToServer(new BlackJackPacket(this.pos,itm,1));
     }
 
     @Override

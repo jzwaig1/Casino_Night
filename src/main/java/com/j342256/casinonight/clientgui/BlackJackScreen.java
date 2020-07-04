@@ -14,7 +14,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class BlackJackScreen extends ContainerScreen<BlackJackContainer> implements Button.IPressable, IRenderable {
 
     private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(CasinoNight.MOD_ID, "textures/gui/black_jack.png");
