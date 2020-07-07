@@ -6,7 +6,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
 
 import java.util.function.Supplier;
 
@@ -37,7 +36,12 @@ public class BlackJackPacket {
         ctx.get().enqueueWork(() -> {
             BlackJackTileEntity tileEntity = (BlackJackTileEntity) ctx.get().getSender().world.getTileEntity(pos);
             tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
-                h.insertItem(slot,stack,false);
+                if (stack == ItemStack.EMPTY){
+                    h.getStackInSlot(slot).setCount(0);
+                }
+                else {
+                    h.insertItem(slot, stack, false);
+                }
             });
         });
         return true;

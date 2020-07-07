@@ -5,39 +5,21 @@ import com.j342256.casinonight.util.BlackJackPacket;
 import com.j342256.casinonight.util.ModContainerTypes;
 import com.j342256.casinonight.util.Networking;
 import com.j342256.casinonight.util.RegistryHandler;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.IWorldPosCallable;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.*;
 import net.minecraftforge.items.wrapper.InvWrapper;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.GameData;
-import org.apache.logging.log4j.core.pattern.AbstractStyleNameConverter;
-
-import java.util.Objects;
 
 public class BlackJackContainer extends Container implements IItemProvider {
     public BlackJackTileEntity tileEntity;
@@ -46,6 +28,8 @@ public class BlackJackContainer extends Container implements IItemProvider {
     private PlayerEntity playerEntity;
     private BlockPos pos;
     public Item item;
+    public boolean open = true;
+    public ItemStack bet = ItemStack.EMPTY;
 
     public BlackJackContainer(int windowId, World world, BlockPos pos, PlayerInventory playerInventory,
                               PlayerEntity player) {
@@ -58,7 +42,18 @@ public class BlackJackContainer extends Container implements IItemProvider {
         this.item = Items.DIAMOND;
         if (tileEntity != null) {
             tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
-                addSlot(new SlotItemHandler(h, 0, 70, 195));
+                addSlot(new SlotItemHandler(h, 0, 70, 195) {
+                    @Override
+                    @OnlyIn(Dist.CLIENT)
+                    public boolean isEnabled() {
+                        if(open) {
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                });
                 addSlot(new SlotItemHandler(h, 1, 70, 175));
             });
         }
@@ -106,14 +101,19 @@ public class BlackJackContainer extends Container implements IItemProvider {
         return itemstack;
     }
 
+    public void holdBet() {
+        this.bet = this.inventorySlots.get(0).getStack();
+        takeBet();
+    }
     public void takeBet() {
-        Networking.sendToServer(new BlackJackPacket(this.pos,  ItemStack.EMPTY, 0));
+        Networking.sendToServer(new BlackJackPacket(this.pos, ItemStack.EMPTY, 0));
+    }
+    public void returnBet() {
+        Networking.sendToServer(new BlackJackPacket(this.pos, this.bet, 0));
     }
     public void giveWinnings(){
-        int amt = this.inventorySlots.get(0).getStack().getCount();
-        this.item = this.inventorySlots.get(0).getStack().getItem();
-        ItemStack itm = new ItemStack(asItem(),amt);
-        Networking.sendToServer(new BlackJackPacket(this.pos,itm, 1));
+        Networking.sendToServer(new BlackJackPacket(this.pos, this.bet, 1));
+        Networking.sendToServer(new BlackJackPacket(this.pos, this.bet, 0));
     }
 
     @Override

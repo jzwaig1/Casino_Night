@@ -8,16 +8,14 @@ import net.minecraft.client.gui.IRenderable;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class BlackJackScreen extends ContainerScreen<BlackJackContainer> implements Button.IPressable, IRenderable {
 
     private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(CasinoNight.MOD_ID, "textures/gui/black_jack.png");
     private static final ResourceLocation CARDS = new ResourceLocation(CasinoNight.MOD_ID, "textures/gui/cards.png");
+    private static final ResourceLocation SLOT = new ResourceLocation(CasinoNight.MOD_ID, "textures/gui/item_slot.png");
 
     public boolean busted = false;
     private int result = 100;
@@ -25,6 +23,7 @@ public class BlackJackScreen extends ContainerScreen<BlackJackContainer> impleme
     private int rngDealer = 0;
     private int rngPlayer1 = 0;
     private int rngPlayer2 = 0;
+    private boolean gameState = false;
 
     public BlackJackScreen(BlackJackContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
         super(screenContainer, inv, titleIn);
@@ -65,6 +64,9 @@ public class BlackJackScreen extends ContainerScreen<BlackJackContainer> impleme
         int y = (this.height - this.ySize) / 2;
         int deltaX = 0;
         this.blit(x, y, 0, 0, this.xSize, this.ySize);
+        this.minecraft.getTextureManager().bindTexture(SLOT);
+        this.blit(x+68, y+193, 0, 0, 19, 19);
+        this.blit(x+68, y+173, 0, 0, 19, 19);
         this.minecraft.getTextureManager().bindTexture(CARDS);
         for(int i=0;i<game.dealerHand.size();++i) {
             this.blit(x + 10 + deltaX, y + 10, game.dealerHand.get(i)[0], game.dealerHand.get(i)[1], 28, 39);
@@ -79,27 +81,44 @@ public class BlackJackScreen extends ContainerScreen<BlackJackContainer> impleme
         this.font.drawString(String.valueOf(game.getDealerScore()),x+115.0f,y+60.0f,4210752);
         if (busted){
             this.font.drawString("YOU BUSTED!",x+100.0f,y+80.0f,4210752);
-            this.container.takeBet();
+            if (gameState) {
+                this.container.takeBet();
+                gameState = false;
+                this.container.open = true;
+            }
             this.buttons.get(0).active = true;
             this.buttons.get(1).active = false;
             this.buttons.get(2).active = false;
         }
         if (result < 0){
             this.font.drawString("DEALER WINS!",x+100.0f,y+80.0f,4210752);
-            this.container.takeBet();
+            if (gameState) {
+                this.container.takeBet();
+                gameState = false;
+                this.container.open = true;
+            }
             this.buttons.get(0).active = true;
             this.buttons.get(1).active = false;
             this.buttons.get(2).active = false;
         }
         if (result == 0){
             this.font.drawString("ITS A PUSH!",x+100.0f,y+80.0f,4210752);
+            if (gameState) {
+                this.container.returnBet();
+                gameState = false;
+                this.container.open = true;
+            }
             this.buttons.get(0).active = true;
             this.buttons.get(1).active = false;
             this.buttons.get(2).active = false;
         }
         if (result > 0 && result != 100){
             this.font.drawString("YOU WIN!",x+100.0f,y+80.0f,4210752);
-            this.container.giveWinnings();
+            if (gameState) {
+                this.container.giveWinnings();
+                gameState = false;
+                this.container.open = true;
+            }
             this.buttons.get(0).active = true;
             this.buttons.get(1).active = false;
             this.buttons.get(2).active = false;
@@ -114,6 +133,9 @@ public class BlackJackScreen extends ContainerScreen<BlackJackContainer> impleme
     public void onPress(Button button) {
         if (button == this.buttons.get(0)) {
             resetGame();
+            gameState = true;
+            this.container.open = false;
+            this.container.holdBet();
             // Checks for Jokers and re-draws if any Joker is drawn.
             do {
                 rngDealer = ((int) (Math.random() * 1000) % 54);
