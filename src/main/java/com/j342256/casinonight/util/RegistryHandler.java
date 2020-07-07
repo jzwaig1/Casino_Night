@@ -3,6 +3,7 @@ package com.j342256.casinonight.util;
 import com.j342256.casinonight.CasinoNight;
 import com.j342256.casinonight.blocks.BlockItemBase;
 import com.j342256.casinonight.blocks.BlackJackBlock;
+import com.j342256.casinonight.blocks.PokerBlock;
 import com.j342256.casinonight.items.ItemBase;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -29,7 +30,9 @@ public class RegistryHandler {
 
     // Blocks
     public static final RegistryObject<Block> BLACK_JACK = BLOCKS.register("black_jack", () -> new BlackJackBlock(Block.Properties.create(Material.CLAY)));
+    public static final RegistryObject<Block> POKER = BLOCKS.register("poker", () -> new PokerBlock(Block.Properties.create(Material.CLAY)));
 
     // Block Items
     public static final RegistryObject<Item> BLACK_JACK_ITEM = ITEMS.register("black_jack", () -> new BlockItemBase(BLACK_JACK.get()));
+    public static final RegistryObject<Item> POKER_ITEM = ITEMS.register("poker", () -> new BlockItemBase(POKER.get()));
 }

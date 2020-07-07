@@ -2,6 +2,7 @@ package com.j342256.casinonight.util;
 
 import com.j342256.casinonight.CasinoNight;
 import com.j342256.casinonight.clientgui.BlackJackScreen;
+import com.j342256.casinonight.clientgui.PokerScreen;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -14,5 +15,6 @@ public class ClientEventBusSubscriber {
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
         ScreenManager.registerFactory(ModContainerTypes.BLACK_JACK.get(), BlackJackScreen::new);
+        ScreenManager.registerFactory(ModContainerTypes.POKER.get(), PokerScreen::new);
     }
 }
